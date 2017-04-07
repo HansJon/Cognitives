@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Image Optical Recognition - Cognitivation</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+</head>
+<body>
+	<input type="file" id="fileID"></input>
+
+	<button id="send">Send image</button>
+
+	<h1>RESPONSE</h1>
+	<p id="response"></p>
+
+	<h1>Image</h1>
+	<img id="output"/>
+
+	<script type="text/javascript">
+		var params = {
+			"language": "unk",
+			"detectOrientation ": "true",
+		};
+
+		var api = "https://westus.api.cognitive.microsoft.com/vision/v1.0/ocr?" + $.param(params);
+		var key = "2e7018e3b4574f3a901d09c0519c055e";
+
+		// Preview Image
+		$("#fileID").change(function(event) {
+			var output = document.getElementById('output');
+
+			output.src = URL.createObjectURL(event.target.files[0]);
+		});
+
+		$("#send").click(sendFile);
+
+		function sendFile() {
+			$("#response").text("Loading...")
+
+			//var file = document.getElementById('fileID').files[0]; // LEGACY
+			var file = $("#fileID").prop('files')[0];
+
+			$(function() {
+				$.ajax({
+					url: api,
+					
+					beforeSend: function(xhrObj) {
+						xhrObj.setRequestHeader("Content-Type", "application/octet-stream");
+						xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", key);
+				},
+				type: "POST",
+				data: file,
+				processData: false
+				})
+				.done(function(response) {
+					outputResult(response);
+					//testing(response);
+				})
+				.fail(function() {
+					$("#response").text(error.getAllRequestHeaders());
+				});
+			});
+		}
+
+		function outputResult(response) {
+			var data = JSON.stringify(response);
+			$("#response").text(data);
+
+
+			// OCR Image Recognition Text
+			var rsp = response.regions[0].lines;
+			var sentence = "";
+
+			for (var i = 0; i < rsp.length; i++) {
+				var words = rsp[i].words;
+
+				for (var a = 0; a < words.length; a++) {
+					sentence += " " + words[a].text;
+				}
+			}
+
+			sentence = $.trim(sentence);
+
+			$("#response").append('<p class="blue">' + sentence + '</p>');
+		}
+
+		function testing(response) {
+			var rsp = response.regions[0].lines;
+			var sentence = "";
+
+			for (var i = 0; i < rsp.length; i++) {
+				var words = rsp[i].words;
+
+				for (var a = 0; a < words.length; a++) {
+					console.log(words[a].text);
+
+					sentence += " " + words[a].text;
+				}
+			}
+
+			// Remove spaces for faster computation speed
+			sentence = $.trim(sentence);
+
+			console.log(sentence);
+		}
+	</script>
+
+	<style type="text/css">
+		#output {
+			width: 50%;
+			height: auto;
+		}
+
+		.blue {
+			color: blue;
+		}
+	</style>
+</body>
+</html>

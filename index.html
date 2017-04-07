@@ -1,0 +1,73 @@
+<html>
+ 
+ <head>
+ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+ </head>
+ 
+ <body>
+ <p>This example shows how to post an image to the Computer Vision API using a binary file</p>
+ <input type="file" id="filename" name="filename" onchange="loadFile(event)">
+ <button id="btn">Click here</button>
+ <pre>
+ <p id="response"></p>
+ </pre>
+ 
+ <script type="text/javascript">
+var params = {
+	// Request parameters
+	"visualFeatures": "Adult",
+	"details": "{string}",
+	"language": "en",
+};
+
+ //apiKey: Replace this with your own Project Oxford Emotion API key, please do not use my key. I include it here so you can get up and running quickly but you can get your own key for free at https://www.projectoxford.ai/emotion 
+ var apiKey = "2e7018e3b4574f3a901d09c0519c055e";
+ 
+ //apiUrl: The base URL for the API. Find out what this is for other APIs via the API documentation
+ var apiUrl = "https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze?details=Celebrities";
+ 
+ $('#btn').click(function () {
+ //file: The file that will be sent to the api
+ var file = document.getElementById('filename').files[0];
+ 
+ CallAPI(file, apiUrl, apiKey);
+ });
+ 
+ function CallAPI(file, apiUrl, apiKey)
+ {
+ $.ajax({
+ url: apiUrl,
+ beforeSend: function (xhrObj) {
+ xhrObj.setRequestHeader("Content-Type", "application/octet-stream");
+ xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", apiKey);
+ },
+ type: "POST",
+ data: file,
+ processData: false
+ })
+ .done(function (response) {
+ ProcessResult(response);
+ })
+ .fail(function (error) {
+ $("#response").text(error.getAllResponseHeaders());
+ });
+ }
+ 
+ function ProcessResult(response)
+ {
+ var data = JSON.stringify(response);
+ $("#response").text(data);
+ console.log(response);
+ }
+ </script>
+
+<img id="output"/>
+<script>
+  var loadFile = function(event) {
+    var output = document.getElementById('output');
+    output.src = URL.createObjectURL(event.target.files[0]);
+  };
+</script>
+ </body>
+ 
+ </html>
