@@ -5,12 +5,19 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 </head>
 <body>
+	<h1>Choose File</h1>
 	<input type="file" id="fileID"></input>
 
 	<button id="send">Send image</button>
 
 	<h1>RESPONSE</h1>
 	<p id="response"></p>
+
+	<h1>DESCRIPTION</h1>
+	<p id="description"></p>
+
+	<h1>TAGS</h1>
+	<p id="tags"></p>
 
 	<h1>Image</h1>
 	<img id="output"/>
@@ -29,7 +36,9 @@
 		$("#send").click(sendFile);
 
 		function sendFile() {
-			$("#response").text("Loading...")
+			$("#response").text("Loading...");
+			$("#description").text("Loading...");
+			$("#tags").text("Loading...");
 
 			//var file = document.getElementById('fileID').files[0]; // LEGACY
 			var file = $("#fileID").prop('files')[0];
@@ -48,8 +57,8 @@
 				})
 				.done(function(response) {
 					outputResult(response);
-					console.log(response.description.tags); // Tags object
-					console.log(JSON.stringify(response.description.captions[0].text)); // Caption text
+					//console.log(response.description.tags); // Tags object
+					//console.log(JSON.stringify(response.description.captions[0].text)); // Caption text
 				})
 				.fail(function() {
 					$("#response").text(error.getAllRequestHeaders());
@@ -60,6 +69,18 @@
 		function outputResult(response) {
 			var data = JSON.stringify(response);
 			$("#response").text(data);
+
+			var desc = response.description.captions[0].text;
+			$("#description").text(desc);
+
+			var tags = response.description.tags;
+			var tagString = "";
+			for (var i = 0; i < tags.length; i++) {
+				tagString += ", " + tags[i];
+			}
+
+			tagString = tagString.substring(2);
+			$("#tags").text(tagString);
 		}
 	</script>
 
