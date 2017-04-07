@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Motion Detection - Cognitivation</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+</head>
+<body>
+	<input type="file" id="fileID"></input>
+
+	<button id="send">Send image</button>
+
+	<h1>RESPONSE</h1>
+	<p id="response"></p>
+
+	<script type="text/javascript">
+		var params = {
+			"sensitivityLevel": "medium",
+			"frameSamplingValue": 1,
+			"detectionZones": "0,0;0.5,0;1,0;1,0.5;1,1;0.5,1;0,1;0,0.5",
+			"detectLightChange": false,
+			"mergeTimeThreshold": 0,
+		};
+
+		var api = "https://westus.api.cognitive.microsoft.com/video/v1.0/detectmotion?" + $.param(params);
+		var key = "f57b7530ef0244bd985d57b910c14230";
+
+		$("#send").click(sendFile);
+
+		function sendFile() {
+			$("#response").text("Loading...");
+
+			//var file = document.getElementById('fileID').files[0]; // LEGACY
+			var file = $("#fileID").prop('files')[0];
+
+			$(function() {
+				$.ajax({
+					url: api,
+					
+					beforeSend: function(xhrObj) {
+						xhrObj.setRequestHeader("Content-Type", "application/octet-stream");
+						xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", key);
+				},
+				type: "POST",
+				data: file,
+				processData: false
+				})
+				.done(function(response) {
+					outputResult(response);
+					//testing(response);
+				})
+				.fail(function(error) {
+					$("#response").text(error.getAllRequestHeaders());
+				});
+			});
+		}
+
+		function outputResult(response) {
+			var data = JSON.stringify(response);
+			$("#response").text(data);
+		}
+	</script>
+
+	<style type="text/css">
+		#output {
+			width: 25%;
+			height: auto;
+		}
+	</style>
+</body>
+</html>
